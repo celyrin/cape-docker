@@ -1,0 +1,69 @@
+name: Build and Release CAPE Docker Project
+
+on:
+  push:
+    branches:
+      - main  # Or your default branch
+    tags:
+      - 'v*'  # This assumes that you use semantic versioning
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        submodules: true  # Ensures submodules are fetched
+
+    - name: Set up Docker Environment
+      uses: docker/setup-buildx-action@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'  # Specify your Python version
+
+    - name: Build Docker image
+      run: |
+        docker build -t cape:latest .
+        docker save -o image.tar cape:latest
+
+    - name: Package Binaries
+      run: tar -czvf bin.tar.gz bin
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |  # Updated release description here
+          This release contains the following files:
+          - `image.tar`: Docker image of the latest build. Use `docker load -i image.tar` to load this image into your Docker environment.
+          - `bin.tar.gz`: Archive of the binaries.
+        draft: false
+        prerelease: false
+
+    - name: Upload Docker Image to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./image.tar
+        asset_name: image.tar
+        asset_content_type: application/octet-stream
+
+    - name: Upload Binaries Archive to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin.tar.gz
+        asset_name: bin.tar.gz
+        asset_content_type: application/gzip
