@@ -5,6 +5,9 @@ FROM ubuntu:22.04
 RUN apt-get update && apt-get install -y \
     python3.10 \
     curl \
+    gcc \
+    g++ \
+    make \
     sudo
 
 # Use update-alternatives to set python3.10 as the default python
@@ -35,7 +38,7 @@ COPY CAPEv2/requirements.txt /home/cape
 # Install Python dependencies
 RUN python -m pip install -r requirements.txt
 
-# COPY bin/vbox-client /usr/bin/VBoxManage
+COPY bin/vbox-client /usr/bin/VBoxManage
 
 # Set the entrypoint to cuckoo
 CMD ["bash"]
