@@ -18,9 +18,9 @@ USER cape
 # Ensure the user cuckoo can access Python and pip
 ENV PATH=$PATH:/usr/bin:/home/cuckoo/.local/bin
 
-# Download and install pip for Python 2.7
-RUN curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o /tmp/get-pip.py
-RUN /usr/bin/python2.7 /tmp/get-pip.py
+# Download and install pip for Python 3.10
+RUN curl https://bootstrap.pypa.io/pip/3.10/get-pip.py -o /tmp/get-pip.py
+RUN /usr/bin/python3.10 /tmp/get-pip.py
 RUN rm /tmp/get-pip.py
 
 COPY CAPEv2/requirements.txt /home/cape
