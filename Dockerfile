@@ -22,6 +22,10 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
 RUN python /tmp/get-pip.py
 RUN rm /tmp/get-pip.py
 
+# Install Python dependencies
+RUN python -m pip install --upgrade pip && \
+    python -m pip install --upgrade setuptools
+
 # # Set the working directory to /home/cuckoo
 WORKDIR /home/cape
 
@@ -31,7 +35,7 @@ COPY CAPEv2/requirements.txt /home/cape
 # Install Python dependencies
 RUN python -m pip install -r requirements.txt
 
-COPY bin/vbox-client /usr/bin/VBoxManage
+# COPY bin/vbox-client /usr/bin/VBoxManage
 
 # Set the entrypoint to cuckoo
 CMD ["bash"]
