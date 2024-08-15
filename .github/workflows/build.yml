@@ -28,12 +28,8 @@ jobs:
     - name: Build project binaries
       run: make all
 
-    # - name: Build Docker image
-    #   run: |
-    #     docker build -t cape:latest .
-
     - name: Save Docker image
-      run: docker save -o image.tar cape:latest
+      run: docker save cape:latest | gzip > cape-docker.tar.gz
 
     - name: Package Binaries
       run: tar -czvf bin.tar.gz bin
@@ -48,7 +44,7 @@ jobs:
         release_name: Release ${{ github.ref }}
         body: |  # Updated release description here
           This release contains the following files:
-          - `image.tar`: Docker image of the latest build. Use `docker load -i image.tar` to load this image into your Docker environment.
+          - `cape-docker.tar.gz`: Docker image of the latest build. Use `gunzip -c cape-docker.tar.gz | docker load` to load this image into your Docker environment.
           - `bin.tar.gz`: Archive of the binaries.
         draft: false
         prerelease: false
@@ -59,8 +55,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./image.tar
-        asset_name: image.tar
+        asset_path: ./cape-docker.tar.gz
+        asset_name: cape-docker.tar.gz
         asset_content_type: application/octet-stream
 
     - name: Upload Binaries Archive to Release
