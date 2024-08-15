@@ -15,6 +15,9 @@ RUN adduser --disabled-password --gecos "" cape && \
 # Switch to cape user
 USER cape
 
+# Ensure the user cuckoo can access Python and pip
+ENV PATH=$PATH:/usr/bin:/home/cuckoo/.local/bin
+
 COPY CAPEv2/requirements.txt /home/cape
 
 RUN pip install -r requirements.txt
