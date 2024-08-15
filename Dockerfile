@@ -4,9 +4,11 @@ FROM ubuntu:22.04
 # Install Python and other dependencies as root before switching to user
 RUN apt-get update && apt-get install -y \
     python3.10 \
-    python-pip \
     curl \
     sudo
+
+# Use update-alternatives to set python3.10 as the default python
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 
 # Create cape user with no password and add to sudo group
 RUN adduser --disabled-password --gecos "" cape && \
@@ -15,22 +17,21 @@ RUN adduser --disabled-password --gecos "" cape && \
 # Switch to cape user
 USER cape
 
-# Ensure the user cuckoo can access Python and pip
-ENV PATH=$PATH:/usr/bin:/home/cuckoo/.local/bin
-
-# Download and install pip for Python 3.10
-RUN curl https://bootstrap.pypa.io/pip/3.10/get-pip.py -o /tmp/get-pip.py
-RUN python3.10 /tmp/get-pip.py
+# Download and install pip for Python
+RUN curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
+RUN python /tmp/get-pip.py
 RUN rm /tmp/get-pip.py
 
+# # Set the working directory to /home/cuckoo
+WORKDIR /home/cape
+
+# Copy the requirements file into the container at /home/cape
 COPY CAPEv2/requirements.txt /home/cape
 
-RUN pip install -r requirements.txt
+# Install Python dependencies
+RUN python -m pip install -r requirements.txt
 
 COPY bin/vbox-client /usr/bin/VBoxManage
-
-# Set the working directory to /home/cuckoo
-WORKDIR /home/cape
 
 # Set the entrypoint to cuckoo
 CMD ["bash"]
