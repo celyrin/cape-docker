@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libmagic1 \
     p7zip-full \
     git \
+    tcpdump \
     sudo
 
 # Use update-alternatives to set python3.10 as the default python
@@ -47,6 +48,10 @@ COPY CAPEv2/requirements.txt /home/cape
 RUN python -m pip install -r requirements.txt && \
     rm -f requirements.txt
 
+# Set the CAPE_CD environment variable
+ENV CAPE_CD=/home/cape/CAPEv2/conf
+
+# Install additional dependencies
 RUN python -m pip install azure-identity msrest msrestazure azure-mgmt-compute azure-mgmt-network azure-mgmt-storage azure-storage-blob && \
     python -m pip install https://github.com/CAPESandbox/peepdf/archive/20eda78d7d77fc5b3b652ffc2d8a5b0af796e3dd.zip#egg=peepdf==0.4.2 && \
     python -m pip install -U git+https://github.com/DissectMalware/batch_deobfuscator && \
