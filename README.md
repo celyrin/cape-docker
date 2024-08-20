@@ -1,5 +1,5 @@
 # cape-docker
-Deploy CAPEv2 Sandbox within a Docker container for efficient malware analysis.
+Deploy [CAPEv2 Sandbox](https://github.com/kevoreilly/CAPEv2.git) within a Docker container for efficient malware analysis.
 
 ## Overview
 This repository contains all the necessary configurations to deploy the CAPEv2 malware analysis system using Docker. The setup includes orchestrating the communication between the CAPEv2 container and VirtualBox installed on the host machine through custom vbox-server and vbox-client components. It also enables network capture using tcpdump within the container which communicates with the guest VMs on the host’s network.
@@ -80,7 +80,7 @@ To process a task within the container:
 ```bash
 docker exec -it <container_id> bash -c 'python utils/process.py <task_id>'
 ```
-After processing is complete, you can find the sample analysis reports in the CAPEv2/storage/analysis/<task_id>/reports/ directory.
+After processing is complete, you can find the sample analysis reports in the 'CAPEv2/storage/analysis/<task_id>/reports/' directory.
 
 
 ## Notice
