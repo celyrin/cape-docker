@@ -18,50 +18,22 @@ RUN apt-get update && apt-get install -y \
 # Use update-alternatives to set python3.10 as the default python
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 
-# Create cape user with no password and add to sudo group
-RUN adduser --disabled-password --gecos "" cape && \
-    usermod -aG sudo cape && \
-    echo "cape ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cape
-
-# Switch to cape user
-USER cape
-
-# Ensure the user cape can access Python and pip
-ENV PATH=$PATH:/usr/bin:/home/cape/.local/bin
-
-# Download and install pip for Python
-RUN curl https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py
-RUN python /tmp/get-pip.py
-RUN rm /tmp/get-pip.py
-
-# Install Python dependencies
-RUN python -m pip install --upgrade pip && \
-    python -m pip install --upgrade setuptools
-
-# # Set the working directory to /home/cuckoo
-WORKDIR /home/cape
-
 # Copy the requirements file into the container at /home/cape
-COPY CAPEv2/requirements.txt /home/cape
+COPY cape-docker/CAPEv2/installer /home
 
-# Install Python dependencies
-RUN python -m pip install -r requirements.txt && \
-    rm -f requirements.txt
 
-# Set the CAPE_CD environment variable
-ENV CAPE_CD=/opt/CAPEv2/conf
+# Set the working directory to /home/cuckoo
+WORKDIR /home/cape/installer
 
-# Set the working directory to /opt/CAPEv2
-WORKDIR /opt/CAPEv2
-
-# Install additional dependencies
-RUN python -m pip install azure-identity msrest msrestazure azure-mgmt-compute azure-mgmt-network azure-mgmt-storage azure-storage-blob && \
-    python -m pip install https://github.com/CAPESandbox/peepdf/archive/20eda78d7d77fc5b3b652ffc2d8a5b0af796e3dd.zip#egg=peepdf==0.4.2 && \
-    python -m pip install -U git+https://github.com/DissectMalware/batch_deobfuscator && \
-    python -m pip install -U git+https://github.com/CAPESandbox/httpreplay
+RUN chmod a+x ./cape2.sh \
+    && ./cape2.sh base cape | tee cape.log \
+    && ./cape2.sh all cape | tee cape.log
 
 # Install VirtualBox
 COPY bin/vbox-client /usr/bin/VBoxManage
+
+# Set the working directory to /opt/CAPEv2
+WORKDIR /opt/CAPEv2
 
 # Install entrypoint
 COPY entrypoint.sh /home/cape/entrypoint.sh
