@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 
 # Copy the requirements file into the container at /home/cape
-COPY cape-docker/CAPEv2/installer /home
+COPY CAPEv2/installer /home
 
 
 # Set the working directory to /home/cuckoo
