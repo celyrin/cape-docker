@@ -10,12 +10,12 @@ all: vbox-server vbox-client docker-build
 # Build vbox-server binary
 vbox-server: 
 	@echo "Building vbox-server..."
-	@go build -o $(BIN_DIR)/vbox-server vbox-server.go
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-extldflags "-static"' -o $(BIN_DIR)/vbox-server vbox-server.go
 
 # Build vbox-client binary
 vbox-client:
 	@echo "Building vbox-client..."
-	@go build -o $(BIN_DIR)/vbox-client vbox-client.go
+	@CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -ldflags '-extldflags "-static"' -o $(BIN_DIR)/vbox-client vbox-client.go
 
 # Build Docker image
 docker-build:
