@@ -18,12 +18,13 @@ RUN apt-get update && apt-get install -y \
 # Use update-alternatives to set python3.10 as the default python
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 
-# Copy the requirements file into the container at /home/cape
-COPY CAPEv2/installer /home
-
 # Set the working directory to /home/cuckoo
 WORKDIR /home/installer
 
+# Copy the requirements file into the container at /home/cape
+COPY CAPEv2/installer/* /home/installer
+
+# Install CAPEv2
 RUN chmod a+x ./cape2.sh \
     && ./cape2.sh base cape \
     && ./cape2.sh all cape
