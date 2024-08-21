@@ -21,9 +21,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 1
 # Copy the requirements file into the container at /home/cape
 COPY CAPEv2/installer /home
 
-
 # Set the working directory to /home/cuckoo
-WORKDIR /home/cape/installer
+WORKDIR /home/installer
 
 RUN chmod a+x ./cape2.sh \
     && ./cape2.sh base cape \
@@ -34,6 +33,9 @@ COPY bin/vbox-client /usr/bin/VBoxManage
 
 # Set the working directory to /opt/CAPEv2
 WORKDIR /opt/CAPEv2
+
+# Clean up
+RUN rm -rf /home/installer
 
 # Install entrypoint
 COPY entrypoint.sh /home/cape/entrypoint.sh
