@@ -35,13 +35,18 @@ RUN chmod a+x ./cape2.sh \
 # Install VirtualBox
 COPY bin/vbox-client /usr/bin/VBoxManage
 
-# Set the working directory to /opt/CAPEv2
-WORKDIR /opt/CAPEv2
-
 # Clean up
 RUN rm -rf /home/installer
 
-# Install entrypoint
-COPY entrypoint.sh /home/cape/entrypoint.sh
+# Copy the entrypoint script into the container at /home/cape
+COPY scripts/entrypoint.sh /home/cape/entrypoint.sh
+COPY scripts/cape-entry.service /etc/systemd/system/cape-entry.service
 
-ENTRYPOINT ["/home/cape/entrypoint.sh"]
+# enable the service
+RUN systemctl enable cape-entry.service
+
+# Set the working directory to /opt/CAPEv2
+WORKDIR /opt/CAPEv2
+
+ENTRYPOINT ["/usr/sbin/init"]
+

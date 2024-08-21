@@ -1,0 +1,11 @@
+[Unit]
+Description=Prepare for the CAPE service.
+After=postgresql@16-main.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/cape/entrypoint.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
