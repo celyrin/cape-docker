@@ -30,13 +30,17 @@ COPY CAPEv2/installer/* /home/installer
 # Install CAPEv2
 RUN chmod a+x ./cape2.sh \
     && ./cape2.sh base cape \
-    && ./cape2.sh all cape
+    && ./cape2.sh all cape \
+    && sudo -u cape poetry install
 
 # Install VirtualBox
 COPY bin/vbox-client /usr/bin/VBoxManage
 
 # Clean up
 RUN rm -rf /home/installer
+
+# Add cape user
+RUN echo "cape ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cape
 
 # Copy the entrypoint script into the container at /home/cape
 COPY scripts/entrypoint.sh /home/cape/entrypoint.sh
