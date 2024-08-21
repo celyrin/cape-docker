@@ -1,6 +1,8 @@
 # Use Ubuntu 22.04 as the base image
 FROM ubuntu:22.04
 
+ENV TZ=UTC
+
 # Install Python and other dependencies as root before switching to user
 RUN apt-get update && apt-get install -y \
     python3.10 \
