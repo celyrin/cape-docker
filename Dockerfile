@@ -30,8 +30,7 @@ COPY CAPEv2/installer/* /home/installer
 # Install CAPEv2
 RUN chmod a+x ./cape2.sh \
     && ./cape2.sh base cape \
-    && ./cape2.sh all cape \
-    && sudo -u cape poetry install
+    && ./cape2.sh all cape
 
 # Install VirtualBox
 COPY bin/vbox-client /usr/bin/VBoxManage
@@ -39,8 +38,12 @@ COPY bin/vbox-client /usr/bin/VBoxManage
 # Clean up
 RUN rm -rf /home/installer
 
-# Add cape user
-RUN echo "cape ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cape
+# Add the cape user to the sudo group
+RUN usermod -aG sudo cape \
+    && echo "cape ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/cape
+
+# Set the password for the cape user
+RUN echo "cape:cape" | chpasswd
 
 # Copy the entrypoint script into the container at /home/cape
 COPY scripts/entrypoint.sh /home/cape/entrypoint.sh
@@ -49,8 +52,15 @@ COPY scripts/cape-entry.service /etc/systemd/system/cape-entry.service
 # enable the service
 RUN systemctl enable cape-entry.service
 
+USER cape
+
 # Set the working directory to /opt/CAPEv2
 WORKDIR /opt/CAPEv2
+
+# Install dependencies
+RUN poetry install
+
+USER  root
 
 ENTRYPOINT ["/usr/sbin/init"]
 
