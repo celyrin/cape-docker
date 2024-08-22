@@ -2,8 +2,6 @@ name: Build and Release CAPE Docker Project
 
 on:
   push:
-    branches:
-      - dev  # Or your default branch
     tags:
       - 'v*'  # This assumes that you use semantic versioning
 
