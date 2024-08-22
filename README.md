@@ -35,12 +35,80 @@ Start the vbox-server before deploying the Docker container:
 
 The server generates a `vbox.sock` file required by the Docker container.
 
-## Configuring CAPE
-Navigate to the configuration directory and set up the configuration files:
+
+## Running the Project
+To successfully run the CAPEv2 environment, ensure that the VirtualBox service (`vbox-server`) is active and the `vbox.sock` file exists on your host. Use the following Docker command to deploy the CAPEv2 container:
+
 ```bash
-cd ./CAPEv2/conf
-./copy_configs.sh
+docker run -it \
+    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
+    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --tmpfs /run --tmpfs /run/lock \
+    --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
+    --cap-add=SYS_NICE -v $(realpath ./work):/work \
+    --name cape cape:latest
 ```
+
+### Detailed Explanation of Docker Command
+This command configures the Docker container with specific settings vital for running CAPEv2 effectively:
+
+- **Volume Mounts**:
+  - `$(realpath ./vbox.sock):/opt/vbox/vbox.sock`: Maps the `vbox.sock` Unix socket from the host into the container. This socket is essential for the container to communicate with VirtualBox, managing virtual machine operations.
+  - `$(realpath ./work):/work`: Mounts a host directory `work` into the container at `/work`. This directory typically stores configuration files, logs, and persistent data, ensuring that important data is retained across container restarts.
+
+- **Mounting cgroup**:
+  - `/sys/fs/cgroup:/sys/fs/cgroup:ro`: Attaches the host’s control group filesystem (`cgroup`) in read-only mode. `systemd`, used within the container, requires access to cgroups to manage system and service processes effectively. Mounting this ensures that `systemd` can orchestrate resources and process lifecycle within the container.
+
+- **Temporary Filesystems**:
+  - `--tmpfs /run --tmpfs /run/lock`: Creates temporary filesystems for `/run` and `/run/lock`. These are crucial for the operation of `systemd` and other processes that need volatile memory locations for runtime and locking mechanisms, which are not persisted after container shutdown.
+
+- **Network Settings**:
+  - `--net=host`: Uses the host’s networking stack. This setting is critical for cases where the container needs to directly manage network traffic, such as interfacing with network applications or managing virtual machines that require seamless network integration.
+
+- **Capabilities**:
+  - `SYS_ADMIN`: Grants administrative privileges, necessary for many of `systemd`'s functions within the container.
+  - `NET_RAW` and `NET_ADMIN`: These capabilities are essential for network traffic capturing and manipulation. They enable the container to perform tasks like packet sniffing and network interface configuration—key for dynamic malware analysis.
+  - `SYS_NICE`: Allows the container to adjust the niceness (priority) of processes, which helps in resource allocation and optimization during intensive tasks.
+
+
+
+## Running the Project
+To successfully run the CAPEv2 environment, ensure that the VirtualBox service (`vbox-server`) is active and the `vbox.sock` file exists on your host. Use the following Docker command to deploy the CAPEv2 container:
+
+```bash
+docker run -it \
+    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
+    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --tmpfs /run --tmpfs /run/lock \
+    --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
+    --cap-add=SYS_NICE -v $(realpath ./work):/work \
+    --name cape celyrin/cape:latest
+```
+
+### Detailed Explanation of Docker Command
+This command configures the Docker container with specific settings vital for running CAPEv2 effectively:
+
+- **Volume Mounts**:
+  - `$(realpath ./vbox.sock):/opt/vbox/vbox.sock`: Maps the `vbox.sock` Unix socket from the host into the container. This socket is essential for the container to communicate with VirtualBox, managing virtual machine operations.
+  - `$(realpath ./work):/work`: Mounts a host directory `work` into the container at `/work`. This directory typically stores configuration files, logs, and persistent data, ensuring that important data is retained across container restarts.
+
+- **Mounting cgroup**:
+  - `/sys/fs/cgroup:/sys/fs/cgroup:ro`: Attaches the host’s control group filesystem (`cgroup`) in read-only mode. `systemd`, used within the container, requires access to cgroups to manage system and service processes effectively. Mounting this ensures that `systemd` can orchestrate resources and process lifecycle within the container.
+
+- **Temporary Filesystems**:
+  - `--tmpfs /run --tmpfs /run/lock`: Creates temporary filesystems for `/run` and `/run/lock`. These are crucial for the operation of `systemd` and other processes that need volatile memory locations for runtime and locking mechanisms, which are not persisted after container shutdown.
+
+- **Network Settings**:
+  - `--net=host`: Uses the host’s networking stack. This setting is critical for cases where the container needs to directly manage network traffic, such as interfacing with network applications or managing virtual machines that require seamless network integration.
+
+- **Capabilities**:
+  - `SYS_ADMIN`: Grants administrative privileges, necessary for many of `systemd`'s functions within the container.
+  - `NET_RAW` and `NET_ADMIN`: These capabilities are essential for network traffic capturing and manipulation. They enable the container to perform tasks like packet sniffing and network interface configuration—key for dynamic malware analysis.
+  - `SYS_NICE`: Allows the container to adjust the niceness (priority) of processes, which helps in resource allocation and optimization during intensive tasks.
+
+
+## Configuring CAPE
+If you are running for the first time, you can use an empty work directory. After the container starts, it will move the CAPE configuration files from the CAPE working directory to the work directory and create symbolic links. You can then make the necessary modifications in the work/conf directory and restart the service.
 
 Modify `cuckoo.conf` to use VirtualBox:
 ```bash
@@ -54,39 +122,58 @@ resultserver.ip=<ip_of_host>
 
 Follow the [official documentation](https://capev2.readthedocs.io/en/latest/installation/guest/index.html) to configure guest VMs in `virtualbox.conf`.
 
-## Running the Project
-Ensure the vbox-server is active and the `vbox.sock` file exists. Then, deploy the CAPEv2 container using:
-```bash
-docker run -it \
-    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    -v $(realpath ./CAPEv2):/opt/CAPEv2 \
-    --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
-    --name cape cape:latest
-```
-This command runs the Docker container with several specific settings:
-- **Volume Mounts**: Maps the `vbox.sock` file and the CAPEv2 directory from your host into the container. This integration is crucial for allowing the container to interface with the host's VirtualBox installation.
-- **Network Settings**: Uses the host’s network directly (`--net=host`), enabling the container to communicate with the virtual machines managed by VirtualBox as if it were part of the host system.
-- **Capabilities**: Adds `NET_RAW` and `NET_ADMIN` to allow the container to perform network captures and manage network settings, essential for dynamic analysis of malware.
 
+## Usage Guide
+
+### Getting Started
+After starting the CAPEv2 container, you can log into the system using the credentials (typically `cape` for both username and password). This allows you to manage services and submit malware samples for analysis. Ensure that your Docker container is properly configured and that you are ready to use CAPEv2's powerful features for dynamic malware analysis.
+
+### Service Management
+Before diving into sample submission or analysis, it's crucial to check the status of the following services to ensure they are active:
+- **cape.service**
+- **cape-web.service**
+- **cape-processor.service**
+
+Use the following command to check the status of these services:
+```bash
+systemctl status <service-name>
+```
+If any of these services aren't running, you'll need to inspect the logs for potential issues and restart the service using:
+```bash
+systemctl restart <service-name>
+```
 
 ### Sample Submission
-Submit a malware sample to the container:
+To submit a malware sample for analysis, ensure your working directory is `/opt/CAPEv2` within the container. Use the following command to submit a sample:
 ```bash
-docker exec -it <container_id> bash -c 'python utils/submit.py /path/to/sample'
+poetry run python utils/submit.py /path/to/sample
 ```
 
-### Process Task
-To process a task within the container:
+### Processing Tasks
+To process a task based on its ID, use the following command:
 ```bash
-docker exec -it <container_id> bash -c 'python utils/process.py <task_id>'
+poetry run python utils/process.py -r <task_id>
 ```
-After processing is complete, you can find the sample analysis reports in the 'CAPEv2/storage/analysis/<task_id>/reports/' directory.
+
+### Using CAPE from Outside the Container
+If you prefer to execute commands from outside the container, use the following syntax:
+```bash
+docker exec -it -u cape cape bash -c '<command>'
+```
+This allows you to manage the container's internal operations from your host machine's command line.
+
+### Accessing the Web Interface
+CAPEv2 also features a web interface for easier management and monitoring of tasks. Since the container is started with the host's network, you can access the web interface by navigating to:
+```
+http://localhost:8000
+```
+This direct access simplifies interactions with CAPE's GUI, making it straightforward to submit samples, check their status, and analyze results.
+
+### General Tips
+- Always ensure that the required services are active before proceeding with sample submissions or task processing.
+- Regularly check service logs if you encounter issues with the functionalities of CAPE.
+- For a smoother experience, familiarize yourself with the basic commands and operational procedures outlined above.
 
 
 ## Notice
-Note that this project only sets up a basic CAPEv2 sandbox functionality. It allows for sample submission and scheduling of VirtualBox virtual machines for analysis, and generates analysis reports. This project does not include many components of the core CAPEv2, so you may encounter some errors during runtime, such as: 
-```bash
-[socket-aux] CRITICAL: Unable to passthrough root command (/tmp/cuckoo-rooter) as the rooter unix socket: inetsim_disable doesn't exist
-```
-I will continue to improve this project and integrate more components in the future to enhance the Dockerized functionality of CAPEv2.
-
+This project is currently under development and may have some issues. If you have any questions, please open an issue in the [GitHub repository](https://github.com/celyrin/cape-docker/issues) or contact me via email at celyrin6@gmail.com.

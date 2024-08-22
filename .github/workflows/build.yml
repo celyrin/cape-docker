@@ -2,8 +2,6 @@ name: Build and Release CAPE Docker Project
 
 on:
   push:
-    # branches:
-    #   - main  # Or your default branch
     tags:
       - 'v*'  # This assumes that you use semantic versioning
 
@@ -36,9 +34,9 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag cape:latest celyrin/cape:base
+        docker tag cape:latest celyrin/cape:latest
         docker tag cape:latest celyrin/cape:${{ github.sha }}
-        docker push celyrin/cape:base
+        docker push celyrin/cape:latest
         docker push celyrin/cape:${{ github.sha }}
 
     - name: Package Binaries
@@ -54,7 +52,7 @@ jobs:
         release_name: Release ${{ github.ref }}
         body: |  # Updated release description here
           This release contains the binaries and Docker images:
-          - Docker images are available on Docker Hub: `celyrin/cape:base` and `celyrin/cape:${{ github.sha }}`
+          - Docker images are available on Docker Hub: `celyrin/cape:latest` and `celyrin/cape:${{ github.sha }}`
           - `bin.tar.gz`: Archive of the binaries.
         draft: false
         prerelease: false
