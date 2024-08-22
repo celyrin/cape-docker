@@ -33,7 +33,7 @@ docker run -it \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
     --cap-add=SYS_NICE -v $(realpath ./work):/work \
     --device /dev/kvm  -v /var/run/libvirt:/var/run/libvirt \
-    --name cape celyrin/cape:latest
+    --name cape celyrin/cape:kvm
 ```
 
 ### Detailed Explanation of Docker Command
