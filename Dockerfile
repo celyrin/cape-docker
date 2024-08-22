@@ -57,13 +57,15 @@ WORKDIR /opt/CAPEv2
 # Install dependencies
 RUN poetry install
 
+# Install libvirt
 RUN sudo apt update \
     && sudo apt install -y libvirt-clients \
     libvirt-dev \
     mlocate \
     && sudo updatedb 
 
-RUN sudo poetry run extra/libvirt_installer.sh
+# Install libvirt modules
+RUN sudo -u cape poetry run extra/libvirt_installer.sh
 
 USER  root
 
