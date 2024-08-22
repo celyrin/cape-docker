@@ -122,6 +122,12 @@ resultserver.ip=<ip_of_host>
 
 Follow the [official documentation](https://capev2.readthedocs.io/en/latest/installation/guest/index.html) to configure guest VMs in `virtualbox.conf`.
 
+Configure the network interface in `auxiliary.conf`:
+Since we are using VirtualBox, you need to change the default KVM network interface virbr0 to vboxnet0 (depending on which interface you have configured). This way, we can use tcpdump to capture traffic.
+```bash
+sniffer.interface=vboxneto
+```
+
 
 ## Usage Guide
 
