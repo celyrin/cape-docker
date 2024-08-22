@@ -3,6 +3,7 @@ Deploy [CAPEv2 Sandbox](https://github.com/kevoreilly/CAPEv2.git) within a Docke
 
 ## Overview
 This repository contains all the necessary configurations to deploy the CAPEv2 malware analysis system using Docker. The setup includes orchestrating the communication between the CAPEv2 container and VirtualBox installed on the host machine through custom vbox-server and vbox-client components. It also enables network capture using tcpdump within the container which communicates with the guest VMs on the host’s network.
+In this branch, I haven't installed CAPE in its entirety. I only installed the dependencies listed in requirements.txt. After testing, the basic functionality of CAPE is operational, and it can serve as a simplified version for installation.
 
 ## Prerequisites
 - Docker
