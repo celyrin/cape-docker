@@ -32,9 +32,6 @@ RUN chmod a+x ./cape2.sh \
     && ./cape2.sh base cape \
     && ./cape2.sh all cape
 
-# Install VirtualBox
-COPY bin/vbox-client /usr/bin/VBoxManage
-
 # Clean up
 RUN rm -rf /home/installer
 
