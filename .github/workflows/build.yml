@@ -2,8 +2,6 @@ name: Build and Release CAPE Docker Project
 
 on:
   push:
-    branches:
-      - 'kvm'
     tags:
       - 'v*'  # This assumes that you use semantic versioning
 
@@ -41,24 +39,17 @@ jobs:
         docker push celyrin/cape:kvm
         docker push celyrin/cape:${{ github.sha }}
 
-    # - name: Create Release
-    #   id: create_release
-    #   uses: actions/create-release@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     tag_name: ${{ github.ref }}
-    #     release_name: Release ${{ github.ref }}
-    #     body: |  # Updated release description here
-    #       For this version's release, we use KVM for virtualization.
-    #       Docker images are available on Docker Hub: `celyrin/cape:kvm` and `celyrin/cape:${{ github.sha }}`
-    #     draft: false
-    #     prerelease: false
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |  # Updated release description here
+          For this version's release, we use KVM for virtualization.
+          Docker images are available on Docker Hub: `celyrin/cape:kvm` and `celyrin/cape:${{ github.sha }}`
+        draft: false
+        prerelease: false
 
-    # - name: Upload Binaries Archive to Release
-    #   uses: actions/upload-release-asset@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-    #     asset_content_type: application/gzip
