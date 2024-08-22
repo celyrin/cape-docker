@@ -1,13 +1,5 @@
 #!/bin/bash
 
-vbox_socket="/opt/vbox/vbox.sock"
-if [ ! -e $vbox_socket ]; then
-    echo "vbox.sock not found"
-    exit 1
-else 
-    sudo chown cape $vbox_socket
-fi
-
 if [ -z "$(sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='cape'")" ]; then
     sudo -u postgres psql -c "CREATE ROLE cape WITH SUPERUSER LOGIN PASSWORD 'SuperPuperSecret';"
 fi
