@@ -15,7 +15,7 @@ Run the following command in the project directory to build the CAPEv2 Docker im
 make all
 ```
 
-This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:latest`.
+This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:dev`.
 If you don't want to build the project yourself, you can download the latest release package from the [Releases](https://github.com/celyrin/cape-docker/releases) section.
 
 
@@ -33,7 +33,7 @@ docker run -it \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
     --cap-add=SYS_NICE -v $(realpath ./work):/work \
     --device /dev/kvm  -v /var/run/libvirt:/var/run/libvirt \
-    --name cape celyrin/cape:kvm
+    --name cape celyrin/cape:dev
 ```
 
 ### Detailed Explanation of Docker Command
