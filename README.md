@@ -17,7 +17,7 @@ Run the following command in the project directory to build the vbox-server, vbo
 make all
 ```
 
-This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:latest`.
+This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:base`.
 If you don't want to build the project yourself, you can download the latest release package from the [Releases](https://github.com/celyrin/cape-docker/releases) section.
 
 ## Cleanup
@@ -62,7 +62,7 @@ docker run -it \
     -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
     -v $(realpath ./CAPEv2):/opt/CAPEv2 \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
-    --name cape cape:latest
+    --name cape cape:base
 ```
 This command runs the Docker container with several specific settings:
 - **Volume Mounts**: Maps the `vbox.sock` file and the CAPEv2 directory from your host into the container. This integration is crucial for allowing the container to interface with the host's VirtualBox installation.

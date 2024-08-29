@@ -20,7 +20,7 @@ vbox-client:
 # Build Docker image
 docker-build:
 	@echo "Building Docker image..."
-	@docker build -t cape .
+	@docker build -t cape:base .
 
 # Clean up binaries and temporary files
 clean:
