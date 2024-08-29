@@ -34,8 +34,8 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag cape:latest celyrin/cape:kvm
-        docker tag cape:latest celyrin/cape:${{ github.sha }}
+        docker tag cape:kvm celyrin/cape:kvm
+        docker tag cape:kvm celyrin/cape:${{ github.sha }}
         docker push celyrin/cape:kvm
         docker push celyrin/cape:${{ github.sha }}
 

@@ -7,7 +7,7 @@ all: docker-build
 # Build Docker image
 docker-build:
 	@echo "Building Docker image..."
-	@docker build -t cape .
+	@docker build -t cape:kvm .
 
 # Declare phony targets
 .PHONY: all docker-build

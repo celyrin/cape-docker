@@ -15,7 +15,7 @@ Run the following command in the project directory to build the CAPEv2 Docker im
 make all
 ```
 
-This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:latest`.
+This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:kvm`.
 If you don't want to build the project yourself, you can download the latest release package from the [Releases](https://github.com/celyrin/cape-docker/releases) section.
 
 
