@@ -1,16 +1,15 @@
 # cape-docker
-Deploy [CAPEv2 Sandbox](https://github.com/kevoreilly/CAPEv2.git) within a Docker container for efficient malware analysis.
+Deploy [CAPEv2 Sandbox](https://github.com/kevoreilly/CAPEv2.git) within a Docker container for efficient malware analysis using KVM.
 
 ## Overview
-This repository contains all the necessary configurations to deploy the CAPEv2 malware analysis system using Docker. The setup includes orchestrating the communication between the CAPEv2 container and VirtualBox installed on the host machine through custom vbox-server and vbox-client components. It also enables network capture using tcpdump within the container which communicates with the guest VMs on the host’s network.
+This Docker setup provides a streamlined process for deploying the CAPEv2 Sandbox for malware analysis, leveraging the power of KVM for virtualization. By encapsulating CAPEv2 within Docker, users can benefit from simplified installation and configuration, while maintaining robust analysis capabilities. This setup is ideal for both development and production environments where quick deployment and isolation are critical.
 
 ## Prerequisites
 - Docker
-- Go Compiler
-- VirtualBox
+- KVM enabled on the host
 
 ## Building the Project
-Run the following command in the project directory to build the vbox-server, vbox-client, and the CAPEv2 Docker image:
+Run the following command in the project directory to build the CAPEv2 Docker image:
 
 ```bash
 make all
@@ -19,81 +18,37 @@ make all
 This command compiles the necessary binaries and builds the CAPEv2 Docker image tagged as `cape:latest`.
 If you don't want to build the project yourself, you can download the latest release package from the [Releases](https://github.com/celyrin/cape-docker/releases) section.
 
-## Cleanup
-Remove binaries and temporary files with:
-
-```bash
-make clean
-```
 
 ## Preparing to Run
-Start the vbox-server before deploying the Docker container:
-
-```bash
-./bin/vbox-server
-```
-
-The server generates a `vbox.sock` file required by the Docker container.
+Ensure that KVM is properly set up and accessible on your host. And make sure the guest machine is ready to be used by CAPEv2. You can follow the [official documentation](https://capev2.readthedocs.io/en/latest/installation/guest/index.html) to set up the guest machine.
 
 
 ## Running the Project
-To successfully run the CAPEv2 environment, ensure that the VirtualBox service (`vbox-server`) is active and the `vbox.sock` file exists on your host. Use the following Docker command to deploy the CAPEv2 container:
+To successfully run the CAPEv2 environment, use the following Docker command to deploy the CAPEv2 container with KVM support:
 
 ```bash
 docker run -it \
-    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host\
     --tmpfs /run --tmpfs /run/lock \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
     --cap-add=SYS_NICE -v $(realpath ./work):/work \
-    --name cape cape:latest
+    --device /dev/kvm  -v /var/run/libvirt:/var/run/libvirt \
+    --name cape celyrin/cape:kvm
 ```
 
 ### Detailed Explanation of Docker Command
-This command configures the Docker container with specific settings vital for running CAPEv2 effectively:
+This command configures the Docker container with specific settings vital for running CAPEv2 effectively using KVM:
 
 - **Volume Mounts**:
-  - `$(realpath ./vbox.sock):/opt/vbox/vbox.sock`: Maps the `vbox.sock` Unix socket from the host into the container. This socket is essential for the container to communicate with VirtualBox, managing virtual machine operations.
   - `$(realpath ./work):/work`: Mounts a host directory `work` into the container at `/work`. This directory typically stores configuration files, logs, and persistent data, ensuring that important data is retained across container restarts.
+  - `/var/run/libvirt:/var/run/libvirt`: Maps the host’s libvirt socket to the container. This socket is crucial for managing virtual machines using KVM within the container.
 
 - **Mounting cgroup**:
-  - `/sys/fs/cgroup:/sys/fs/cgroup:ro`: Attaches the host’s control group filesystem (`cgroup`) in read-only mode. `systemd`, used within the container, requires access to cgroups to manage system and service processes effectively. Mounting this ensures that `systemd` can orchestrate resources and process lifecycle within the container.
+  - `sys/fs/cgroup:/sys/fs/cgroup:rw`: Attaches the host’s control group filesystem (`cgroup`) in read-write mode. This is necessary for `systemd` to manage system and service processes effectively within the container.
+  - `--cgroupns=host`: Shares the host’s cgroup namespace with the container. This setting is essential for `systemd` to manage cgroups effectively and orchestrate resources within the container.
 
-- **Temporary Filesystems**:
-  - `--tmpfs /run --tmpfs /run/lock`: Creates temporary filesystems for `/run` and `/run/lock`. These are crucial for the operation of `systemd` and other processes that need volatile memory locations for runtime and locking mechanisms, which are not persisted after container shutdown.
-
-- **Network Settings**:
-  - `--net=host`: Uses the host’s networking stack. This setting is critical for cases where the container needs to directly manage network traffic, such as interfacing with network applications or managing virtual machines that require seamless network integration.
-
-- **Capabilities**:
-  - `SYS_ADMIN`: Grants administrative privileges, necessary for many of `systemd`'s functions within the container.
-  - `NET_RAW` and `NET_ADMIN`: These capabilities are essential for network traffic capturing and manipulation. They enable the container to perform tasks like packet sniffing and network interface configuration—key for dynamic malware analysis.
-  - `SYS_NICE`: Allows the container to adjust the niceness (priority) of processes, which helps in resource allocation and optimization during intensive tasks.
-
-
-
-## Running the Project
-To successfully run the CAPEv2 environment, ensure that the VirtualBox service (`vbox-server`) is active and the `vbox.sock` file exists on your host. Use the following Docker command to deploy the CAPEv2 container:
-
-```bash
-docker run -it \
-    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-    --tmpfs /run --tmpfs /run/lock \
-    --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
-    --cap-add=SYS_NICE -v $(realpath ./work):/work \
-    --name cape celyrin/cape:latest
-```
-
-### Detailed Explanation of Docker Command
-This command configures the Docker container with specific settings vital for running CAPEv2 effectively:
-
-- **Volume Mounts**:
-  - `$(realpath ./vbox.sock):/opt/vbox/vbox.sock`: Maps the `vbox.sock` Unix socket from the host into the container. This socket is essential for the container to communicate with VirtualBox, managing virtual machine operations.
-  - `$(realpath ./work):/work`: Mounts a host directory `work` into the container at `/work`. This directory typically stores configuration files, logs, and persistent data, ensuring that important data is retained across container restarts.
-
-- **Mounting cgroup**:
-  - `/sys/fs/cgroup:/sys/fs/cgroup:ro`: Attaches the host’s control group filesystem (`cgroup`) in read-only mode. `systemd`, used within the container, requires access to cgroups to manage system and service processes effectively. Mounting this ensures that `systemd` can orchestrate resources and process lifecycle within the container.
+- **Device Mapping**:
+  - `/dev/kvm`: Maps the `/dev/kvm` device from the host to the container. This device is essential for KVM-based virtualization, allowing the container to create and manage virtual machines using the host’s KVM capabilities.
 
 - **Temporary Filesystems**:
   - `--tmpfs /run --tmpfs /run/lock`: Creates temporary filesystems for `/run` and `/run/lock`. These are crucial for the operation of `systemd` and other processes that need volatile memory locations for runtime and locking mechanisms, which are not persisted after container shutdown.
@@ -112,22 +67,15 @@ If you are running for the first time, you can use an empty work directory. Afte
 
 Modify `cuckoo.conf` to use VirtualBox:
 ```bash
-cuckoo.machinery=virtualbox
+cuckoo.machinery=kvm
 ```
 
-Specify the result server IP in `cuckoo.conf`. Use the IP address of vboxnet0 or other VirtualBox network cards in the host machine:
+Specify the result server IP in `cuckoo.conf`. Use the IP address of virbr0 or other KVM network cards in the host machine:
 ```bash
 resultserver.ip=<ip_of_host>
 ```
 
-Follow the [official documentation](https://capev2.readthedocs.io/en/latest/installation/guest/index.html) to configure guest VMs in `virtualbox.conf`.
-
-Configure the network interface in `auxiliary.conf`:
-Since we are using VirtualBox, you need to change the default KVM network interface virbr0 to vboxnet0 (depending on which interface you have configured). This way, we can use tcpdump to capture traffic.
-```bash
-sniffer.interface=vboxneto
-```
-
+Follow the [official documentation](https://capev2.readthedocs.io/en/latest/installation/index.html) to configure guest VMs in kvm.conf.
 
 ## Usage Guide
 

@@ -34,9 +34,9 @@ jobs:
 
     - name: Push Docker image
       run: |
-        docker tag cape:latest celyrin/cape:latest
-        docker tag cape:latest celyrin/cape:${{ github.sha }}
-        docker push celyrin/cape:latest
+        docker tag cape:dev celyrin/cape:dev
+        docker tag cape:dev celyrin/cape:${{ github.sha }}
+        docker push celyrin/cape:dev
         docker push celyrin/cape:${{ github.sha }}
 
     - name: Package Binaries
@@ -52,7 +52,7 @@ jobs:
         release_name: Release ${{ github.ref }}
         body: |  # Updated release description here
           This release contains the binaries and Docker images:
-          - Docker images are available on Docker Hub: `celyrin/cape:latest` and `celyrin/cape:${{ github.sha }}`
+          - Docker images are available on Docker Hub: `celyrin/cape:dev` and `celyrin/cape:${{ github.sha }}`
           - `bin.tar.gz`: Archive of the binaries.
         draft: false
         prerelease: false
