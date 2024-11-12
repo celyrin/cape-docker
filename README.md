@@ -44,7 +44,7 @@ To successfully run the CAPEv2 environment, ensure that the VirtualBox service (
 ```bash
 docker run -it \
     -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
     --tmpfs /run --tmpfs /run/lock \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
     --cap-add=SYS_NICE -v $(realpath ./work):/work \
