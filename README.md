@@ -44,20 +44,7 @@ To successfully run the CAPEv2 environment, ensure that the VirtualBox service (
 ```bash
 docker run -it \
     -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
-    --tmpfs /run --tmpfs /run/lock \
-    --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
-    --cap-add=SYS_NICE -v $(realpath ./work):/work \
-    --name cape cape:latest
-```
-
-## Running the Project
-To successfully run the CAPEv2 environment, ensure that the VirtualBox service (`vbox-server`) is active and the `vbox.sock` file exists on your host. Use the following Docker command to deploy the CAPEv2 container:
-
-```bash
-docker run -it \
-    -v $(realpath ./vbox.sock):/opt/vbox/vbox.sock \
-    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:ro --cgroupns=host\
+    --cap-add SYS_ADMIN -v /sys/fs/cgroup:/sys/fs/cgroup:rw --cgroupns=host\
     --tmpfs /run --tmpfs /run/lock \
     --net=host --cap-add=NET_RAW --cap-add=NET_ADMIN \
     --cap-add=SYS_NICE -v $(realpath ./work):/work \
